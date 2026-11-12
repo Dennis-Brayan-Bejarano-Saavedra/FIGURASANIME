@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ventas e Inventario - Tienda Anime</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 sm:p-6">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Título principal -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
+                <i class="fa-solid fa-store mr-2"></i> OtakuStore - POS & Inventario
+            </h1>
+            <p class="text-slate-400 mt-2">Sistema con carga de imágenes locales.</p>
+        </header>
+
+        <!-- Navegación de pestañas -->
+        <div class="flex justify-center mb-8">
+            <div class="bg-slate-800 p-1 rounded-xl border border-slate-700 flex space-x-2">
+                <button onclick="cambiarPestana('ventas')" id="btnVentas" class="px-6 py-2.5 rounded-lg font-semibold transition bg-pink-600 text-white shadow-lg">
+                    <i class="fa-solid fa-cash-register mr-2"></i> Caja / Ventas
+                </button>
+                <button onclick="cambiarPestana('inventario')" id="btnInventario" class="px-6 py-2.5 rounded-lg font-semibold transition text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-boxes-stacked mr-2"></i> Inventario & Productos
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= SECCIÓN DE VENTAS ================= -->
+        <div id="seccionVentas" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700">
+                <h2 class="text-xl font-bold mb-4 text-pink-400 flex items-center">
+                    <i class="fa-solid fa-cart-shopping mr-2"></i> Seleccionar Productos para Venta
+                </h2>
+                <div id="catalogoVentas" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto pr-2">
+                    <!-- Productos dinámicos -->
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold mb-4 text-purple-400 flex items-center">
+                        <i class="fa-solid fa-receipt mr-2"></i> Ticket Actual
+                    </h2>
+                    <div id="carritoItems" class="space-y-3 max-h-[250px] overflow-y-auto pr-1 mb-4 text-sm divide-y divide-slate-700/50">
+                        <p class="text-slate-500 text-center py-6">El carrito está vacío</p>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-700 pt-4 mt-auto">
+                    <div class="flex justify-between text-xl font-bold mb-4">
+                        <span>Total:</span>
+                        <span id="carritoTotal" class="text-emerald-400">$0.00</span>
+                    </div>
+                    <button onclick="procesarVenta()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 font-bold py-3 rounded-xl transition shadow-lg flex items-center justify-center">
+                        <i class="fa-solid fa-check-circle mr-2"></i> Cobrar y Registrar Venta
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SECCIÓN DE INVENTARIO ================= -->
+        <div id="seccionInventario" class="hidden grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Formulario con input de archivo -->
+            <div class="bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700 h-fit">
+                <h2 class="text-xl font-bold mb-4 text-pink-400 flex items-center">
+                    <i class="fa-solid fa-plus-circle mr-2"></i> Agregar Producto
+                </h2>
+                <form id="productForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Nombre del Producto</label>
+                        <input type="text" id="nombre" required placeholder="Ej. Figura Funko Pop Naruto" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-pink-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Categoría</label>
+                        <select id="categoria" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-pink-500">
+                            <option value="Figura">Figura / Coleccionable</option>
+                            <option value="Manga">Manga / Libro</option>
+                            <option value="Ropa">Ropa / Cosplay</option>
+                            <option value="Accesorios">Accesorios / Llaveros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Precio ($)</label>
+                        <input type="number" id="precio" step="0.01" required placeholder="29.99" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-pink-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Stock (Cantidad)</label>
+                        <input type="number" id="stock" required placeholder="10" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-pink-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Seleccionar Imagen de tu PC</label>
+                        <input type="file" id="imagenArchivo" accept="image/*" 
+                            class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-500 cursor-pointer">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 font-bold py-2.5 rounded-lg transition duration-200 shadow-lg">
+                        Registrar en Inventario
+                    </button>
+                </form>
+            </div>
+
+            <!-- Listado de Productos -->
+            <div class="lg:col-span-2 bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-purple-400 flex items-center">
+                        <i class="fa-solid fa-boxes-stacked mr-2"></i> Inventario Actual
+                    </h2>
+                    <span id="totalProducts" class="bg-slate-700 text-xs font-semibold px-3 py-1 rounded-full">0 productos</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-700 text-slate-400 text-sm">
+                                <th class="py-3 px-2">Imagen</th>
+                                <th class="py-3 px-4">Nombre</th>
+                                <th class="py-3 px-4">Categoría</th>
+                                <th class="py-3 px-4">Precio</th>
+                                <th class="py-3 px-4">Stock</th>
+                                <th class="py-3 px-4 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody" class="divide-y divide-slate-700 text-sm">
+                            <!-- Inserción dinámica -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Ventas -->
+        <div class="mt-8 bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700">
+            <h2 class="text-xl font-bold mb-4 text-teal-400 flex items-center">
+                <i class="fa-solid fa-clock-rotate-left mr-2"></i> Historial de Ventas Realizadas
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-slate-400">
+                            <th class="py-3 px-4">Fecha y Hora</th>
+                            <th class="py-3 px-4">Productos Vendidos</th>
+                            <th class="py-3 px-4 text-right">Total Cobrado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaVentasBody" class="divide-y divide-slate-700">
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-slate-500">No hay ventas registradas aún.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript del Sistema -->
+    <script>
+        let productos = JSON.parse(localStorage.getItem('anime_productos')) || [];
+        let ventas = JSON.parse(localStorage.getItem('anime_ventas')) || [];
+        let carrito = [];
+
+        function cambiarPestana(pestana) {
+            const seccionVentas = document.getElementById('seccionVentas');
+            const seccionInventario = document.getElementById('seccionInventario');
+            const btnVentas = document.getElementById('btnVentas');
+            const btnInventario = document.getElementById('btnInventario');
+
+            if (pestana === 'ventas') {
+                seccionVentas.classList.remove('hidden');
+                seccionVentas.classList.add('grid');
+                seccionInventario.classList.add('hidden');
+                seccionInventario.classList.remove('grid');
+                btnVentas.className = "px-6 py-2.5 rounded-lg font-semibold transition bg-pink-600 text-white shadow-lg";
+                btnInventario.className = "px-6 py-2.5 rounded-lg font-semibold transition text-slate-400 hover:text-white";
+                renderizarCatalogoVentas();
+            } else {
+                seccionInventario.classList.remove('hidden');
+                seccionInventario.classList.add('grid');
+                seccionVentas.classList.add('hidden');
+                seccionVentas.classList.remove('grid');
+                btnInventario.className = "px-6 py-2.5 rounded-lg font-semibold transition bg-purple-600 text-white shadow-lg";
+                btnVentas.className = "px-6 py-2.5 rounded-lg font-semibold transition text-slate-400 hover:text-white";
+                renderizarInventario();
+            }
+        }
+
+        const productForm = document.getElementById('productForm');
+
+        function guardarDatos() {
+            localStorage.setItem('anime_productos', JSON.stringify(productos));
+            localStorage.setItem('anime_ventas', JSON.stringify(ventas));
+        }
+
+        function renderizarInventario() {
+            const tbody = document.getElementById('productTableBody');
+            const totalProductsSpan = document.getElementById('totalProducts');
+            tbody.innerHTML = '';
+            totalProductsSpan.textContent = `${productos.length} productos`;
+
+            productos.forEach((prod, index) => {
+                const row = document.createElement('tr');
+                const imgSrc = prod.imagen ? prod.imagen : 'https://via.placeholder.com/50?text=Anime';
+                row.innerHTML = `
+                    <td class="py-3 px-2"><img src="${imgSrc}" class="w-12 h-12 object-cover rounded-md border border-slate-700"></td>
+                    <td class="py-3 px-4 font-medium">${prod.nombre}</td>
+                    <td class="py-3 px-4"><span class="bg-purple-900/50 text-purple-300 text-xs px-2.5 py-1 rounded-full border border-purple-700/50">${prod.categoria}</span></td>
+                    <td class="py-3 px-4 text-emerald-400 font-semibold">$${Number(prod.precio).toFixed(2)}</td>
+                    <td class="py-3 px-4">${prod.stock} un.</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="eliminarProducto(${index})" class="text-red-400 hover:text-red-300 bg-red-950/40 p-2 rounded-lg transition"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Manejo del formulario con lectura de imagen local (FileReader)
+        productForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const archivoInput = document.getElementById('imagenArchivo');
+            const nombre = document.getElementById('nombre').value;
+            const categoria = document.getElementById('categoria').value;
+            const precio = parseFloat(document.getElementById('precio').value);
+            const stock = parseInt(document.getElementById('stock').value);
+
+            // Función interna para guardar el producto final
+            const registrarProductoConImagen = (imagenUrl) => {
+                const nuevoProducto = { nombre, categoria, precio, stock, imagen: imagenUrl };
+                productos.push(nuevoProducto);
+                guardarDatos();
+                renderizarInventario();
+                productForm.reset();
+                alert('¡Producto agregado con éxito!');
+            };
+
+            // Si el usuario seleccionó un archivo de su PC
+            if (archivoInput.files && archivoInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    registrarProductoConImagen(e.target.result); // Resultado en Base64
+                };
+                reader.readAsDataURL(archivoInput.files[0]);
+            } else {
+                // Si no seleccionó imagen, se guarda sin imagen (o con vacía)
+                registrarProductoConImagen('');
+            }
+        });
+
+        function eliminarProducto(index) {
+            if (confirm('¿Estás seguro de eliminar este producto?')) {
+                productos.splice(index, 1);
+                guardarDatos();
+                renderizarInventario();
+            }
+        }
+
+        function renderizarCatalogoVentas() {
+            const catalogo = document.getElementById('catalogoVentas');
+            catalogo.innerHTML = '';
+
+            if (productos.length === 0) {
+                catalogo.innerHTML = `<p class="text-slate-500 col-span-full text-center py-8">No hay productos en el inventario. Agrega algunos en la pestaña de inventario.</p>`;
+                renderizarCarrito();
+                renderizarHistorialVentas();
+                return;
+            }
+
+            productos.forEach((prod, index) => {
+                const card = document.createElement('div');
+                const imgSrc = prod.imagen ? prod.imagen : 'https://via.placeholder.com/150?text=Anime';
+                card.className = `bg-slate-900 border ${prod.stock > 0 ? 'border-slate-700 hover:border-pink-500 cursor-pointer' : 'border-red-900/50 opacity-50'} rounded-xl p-4 flex flex-col justify-between transition`;
+                
+                if (prod.stock > 0) {
+                    card.onclick = () => agregarAlCarrito(index);
+                }
+
+                card.innerHTML = `
+                    <div>
+                        <img src="${imgSrc}" class="w-full h-32 object-cover rounded-lg mb-3 border border-slate-700">
+                        <h3 class="font-bold text-white mb-1 line-clamp-1">${prod.nombre}</h3>
+                        <p class="text-xs text-purple-400 mb-2">${prod.categoria}</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-emerald-400 font-bold">$${prod.precio.toFixed(2)}</span>
+                        <span class="text-xs ${prod.stock > 0 ? 'text-slate-400' : 'text-red-400 font-semibold'}">Stock: ${prod.stock}</span>
+                    </div>
+                `;
+                catalogo.appendChild(card);
+            });
+            renderizarCarrito();
+            renderizarHistorialVentas();
+        }
+
+        function agregarAlCarrito(indexProd) {
+            const prod = productos[indexProd];
+            const itemEnCarrito = carrito.find(item => item.index === indexProd);
+            const cantidadEnCarrito = itemEnCarrito ? itemEnCarrito.cantidad : 0;
+
+            if (prod.stock <= cantidadEnCarrito) {
+                alert('No hay suficiente stock disponible.');
+                return;
+            }
+
+            if (itemEnCarrito) {
+                itemEnCarrito.cantidad++;
+            } else {
+                carrito.push({ index: indexProd, nombre: prod.nombre, precio: prod.precio, cantidad: 1 });
+            }
+            renderizarCarrito();
+        }
+
+        function renderizarCarrito() {
+            const contenedor = document.getElementById('carritoItems');
+            const totalSpan = document.getElementById('carritoTotal');
+            contenedor.innerHTML = '';
+
+            if (carrito.length === 0) {
+                contenedor.innerHTML = `<p class="text-slate-500 text-center py-6">El carrito está vacío</p>`;
+                totalSpan.textContent = '$0.00';
+                return;
+            }
+
+            let total = 0;
+            carrito.forEach((item, i) => {
+                const subtotal = item.precio * item.cantidad;
+                total += subtotal;
+
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center py-2";
+                div.innerHTML = `
+                    <div>
+                        <p class="font-medium text-white">${item.nombre}</p>
+                        <p class="text-xs text-slate-400">${item.cantidad} x $${item.precio.toFixed(2)}</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="font-semibold text-emerald-400">$${subtotal.toFixed(2)}</span>
+                        <button onclick="removerDelCarrito(${i})" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                `;
+                contenedor.appendChild(div);
+            });
+
+            totalSpan.textContent = `$${total.toFixed(2)}`;
+        }
+
+        function removerDelCarrito(indexCarrito) {
+            carrito.splice(indexCarrito, 1);
+            renderizarCarrito();
+        }
+
+        function procesarVenta() {
+            if (carrito.length === 0) {
+                alert('El carrito está vacío.');
+                return;
+            }
+
+            let totalVenta = 0;
+            carrito.forEach(item => {
+                productos[item.index].stock -= item.cantidad;
+                totalVenta += item.precio * item.cantidad;
+            });
+
+            const nuevaVenta = {
+                fecha: new Date().toLocaleString(),
+                productos: [...carrito],
+                total: totalVenta
+            };
+
+            ventas.unshift(nuevaVenta);
+            carrito = [];
+            guardarDatos();
+            renderizarCatalogoVentas();
+            alert('¡Venta realizada con éxito! Stock actualizado.');
+        }
+
+        function renderizarHistorialVentas() {
+            const tbody = document.getElementById('tablaVentasBody');
+            tbody.innerHTML = '';
+
+            if (ventas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-500">No hay ventas registradas aún.</td></tr>`;
+                return;
+            }
+
+            ventas.forEach(v => {
+                const tr = document.createElement('tr');
+                const descripcionProds = v.productos.map(p => `${p.cantidad}x ${p.nombre}`).join(', ');
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-slate-400">${v.fecha}</td>
+                    <td class="py-3 px-4">${descripcionProds}</td>
+                    <td class="py-3 px-4 text-right font-bold text-emerald-400">$${v.total.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Inicializar aplicación
+        renderizarCatalogoVentas();
+    </script>
+</body>
+</html>
